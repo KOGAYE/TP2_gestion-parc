@@ -472,7 +472,7 @@ LISTEN 0      4096           [::1]:8125          [::]:*    users:(("netdata",pid
 LISTEN 0      4096            [::]:19999         [::]:*    users:(("netdata",pid=2966,fd=7))
 [kogaye@monitoring ~]$ sudo firewall-cmd --permanent --add-port=19999/tcp
 success
-[unuser@monitoring ~]$ sudo firewall-cmd --reload
+[kogaye@monitoring ~]$ sudo firewall-cmd --reload
 success
 ```
 
