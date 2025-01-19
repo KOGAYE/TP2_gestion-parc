@@ -4,25 +4,25 @@
 
 S'assurer que le service sshd est démarré
 ```bash 
-[unuser@web ~]$ systemctl status sshd
+[kogaye@web ~]$ systemctl status sshd
 ● sshd.service - OpenSSH server daemon
      Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)
-     Active: active (running) since Fri 2024-11-29 23:40:05 CET; 35min ago
+     Active: active (running) since Fri 2024-12-21 21:40:38 CET; 7min ago
        Docs: man:sshd(8)
              man:sshd_config(5)
    Main PID: 717 (sshd)
       Tasks: 1 (limit: 11084)
-     Memory: 5.0M
-        CPU: 63ms
+     Memory: 2.8M
+        CPU: 68ms
      CGroup: /system.slice/sshd.service
 ```
 
 analyser les processus liés au service ssh
 ```bash
-root         717       1  0 Nov29 ?        00:00:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
-root        1271     717  0 Nov29 ?        00:00:00 sshd: unuser [priv]
-unuser      1275    1271  0 Nov29 ?        00:00:00 sshd: unuser@pts/0
-unuser      1334    1276  0 00:06 pts/0    00:00:00 grep --color=auto sshd
+root         717       1  0 Dec21 ?        00:00:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+root        1271     717  0 Dec21 ?        00:00:00 sshd: kogaye [priv]
+kogaye      1275    1271  0 Dec21 ?        00:00:00 sshd: kogaye@pts/0
+kogaye      1334    1276  0 00:06 pts/0    00:00:00 grep --color=auto sshd
 ```
 
 
@@ -30,31 +30,31 @@ unuser      1334    1276  0 00:06 pts/0    00:00:00 grep --color=auto sshd
 Déterminer le port sur lequel écoute le service ssh
 
 ```bash
-[unuser@web ~]$ sudo ss -tlnp
-[sudo] password for unuser:
+[kogaye@web ~]$ sudo ss -tlnp
+[sudo] password for kogaye:
 State     Recv-Q    Send-Q         Local Address:Port         Peer Address:Port    Process
 LISTEN    0         128                  0.0.0.0:22                0.0.0.0:*        users:(("sshd",pid=717,fd=3))
 LISTEN    0         128                     [::]:22                   [::]:*        users:(("sshd",pid=717,fd=4))
 ```
 
-il écoute donc sur le port 22
+port--> 22
 
 
 ```bash
-[unuser@web ~]$ journalctl -u sshd
-Nov 29 23:40:05 web.tp1.b1 systemd[1]: Starting OpenSSH server daemon...
-Nov 29 23:40:05 web.tp1.b1 sshd[717]: Server listening on 0.0.0.0 port 22.
-Nov 29 23:40:05 web.tp1.b1 sshd[717]: Server listening on :: port 22.
-Nov 29 23:40:05 web.tp1.b1 systemd[1]: Started OpenSSH server daemon.
-Nov 29 23:53:53 web.tp1.b1 sshd[1271]: Accepted password for unuser from 10.1.1.3 port 65387 ssh2
-Nov 29 23:53:53 web.tp1.b1 sshd[1271]: pam_unix(sshd:session): session opened for user unuser(uid=1000) by unuser(ui>
+[kogaye@web ~]$ journalctl -u sshd
+Dec 21 22:21:24 web.tp1.b1 systemd[1]: Starting OpenSSH server daemon...
+Dec 21 22:21:24 web.tp1.b1 sshd[717]: Server listening on 0.0.0.0 port 22.
+Dec 21 22:21:24 web.tp1.b1 sshd[717]: Server listening on :: port 22.
+Dec 21 22:21:24 web.tp1.b1 systemd[1]: Started OpenSSH server daemon.
+Dec 21 22:32:53 web.tp1.b1 sshd[1271]: Accepted password for kogaye from 10.1.1.3 port 65387 ssh2
+Dec 21 22:32:53 web.tp1.b1 sshd[1271]: pam_unix(sshd:session): session opened for user kogaye(uid=1000) by kogaye(ui>
 ```
 
 identifier le fichier de config de ssh
 ```bash
-[unuser@web ~]$ sudo cat /etc/ssh/sshd_config
-[sudo] password for unuser:
-#       $OpenBSD: sshd_config,v 1.104 2021/07/02 05:11:21 dtucker Exp $
+[kogaye@web ~]$ sudo cat /etc/ssh/sshd_config
+[sudo] password for kogaye:
+#       $OpenBSD: sshd_config,v 1.104 2021/07/02 22:55:21 dtucker Exp $
 
 # This is the sshd server system-wide configuration file.  See
 # sshd_config(5) for more information.
@@ -189,32 +189,32 @@ Subsystem       sftp    /usr/libexec/openssh/sftp-server
 modifier le fichier de conf
 
 ```bash
-[unuser@web ~]$ echo $RANDOM
+[kogaye@web ~]$ echo $RANDOM
 12440
 
 
-[unuser@web ~]$ sudo cat /etc/ssh/sshd_config | grep Port
+[kogaye@web ~]$ sudo cat /etc/ssh/sshd_config | grep Port
 Port 12440
 ```
 
 
 ```bash
-[unuser@web ~]$ sudo firewall-cmd --list-all | grep 12440
+[kogaye@web ~]$ sudo firewall-cmd --list-all | grep 12440
   ports: 12440/tcp
 ```
 
 
 redémarrer le service 
 ```bash
-[unuser@web ~]$ sudo systemctl restart sshd
+[kogaye@web ~]$ sudo systemctl restart sshd
 ```
 
 connection au port spécifique
 ```bash
-PS C:\Users\maybelater> ssh unuser@10.1.1.1 -p 12440
-unuser@10.1.1.1's password:
-Last login: Fri Nov 29 23:53:53 2024 from 10.1.1.3
-[unuser@web ~]$
+PS C:\Users\kogaye> ssh kogaye@10.1.1.1 -p 12440
+kogaye@10.1.1.1's password:
+Last login: Sat Dec 21 23:10:25 2024 from 10.1.1.3
+[kogaye@web ~]$
 ```
 
 
@@ -225,8 +225,8 @@ Last login: Fri Nov 29 23:53:53 2024 from 10.1.1.3
 installer le serveur NGINX
 
 ```bash
-[unuser@web ~]$ sudo dnf install nginx
-[sudo] password for unuser:
+[kogaye@web ~]$ sudo dnf install nginx
+[sudo] password for kogaye:
 Rocky Linux 9 - BaseOS                                                                12 kB/s | 4.1 kB     00:00
 Rocky Linux 9 - AppStream                                                             18 kB/s | 4.5 kB     00:00
 Rocky Linux 9 - Extras                                                                11 kB/s | 2.9 kB     00:00
@@ -284,13 +284,13 @@ Complete!
 Démarrer le service NGINX
 
 ```bash
-[unuser@web ~]$ sudo systemctl start nginx
+[kogaye@web ~]$ sudo systemctl start nginx
 ```
 
 
 Déterminer sur quel port tourne NGINX
 ```bash
-[unuser@web ~]$ sudo ss -tlnp | grep nginx
+[kogaye@web ~]$ sudo ss -tlnp | grep nginx
 LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:(("nginx",pid=1466,fd=6),("nginx",pid=1465,fd=6))
 LISTEN 0      511             [::]:80           [::]:*    users:(("nginx",pid=1466,fd=7),("nginx",pid=1465,fd=7))
 ```
@@ -299,16 +299,16 @@ LISTEN 0      511             [::]:80           [::]:*    users:(("nginx",pid=14
 firewall
 
 ```bash
-[unuser@web ~]$ sudo firewall-cmd --permanent --add-port=80/tcp
+[kogaye@web ~]$ sudo firewall-cmd --permanent --add-port=80/tcp
 success
-[unuser@web ~]$ sudo firewall-cmd --reload
+[kogaye@web ~]$ sudo firewall-cmd --reload
 success
 ```
 
 Déterminer le processus lié au service NGINX
 
 ```bash
-[unuser@web ~]$ ps -ef | grep nginx
+[kogaye@web ~]$ ps -ef | grep nginx
 root        1465       1  0 12:05 ?        00:00:00 nginx: master process /usr/sbin/nginx
 nginx       1466    1465  0 12:05 ?        00:00:00 nginx: worker process
 ```
@@ -316,10 +316,10 @@ nginx       1466    1465  0 12:05 ?        00:00:00 nginx: worker process
 Déterminer le nom de l'utilisateur que lance nginx
 
 ```bash
-[unuser@web ~]$ sudo cat /etc/passwd | grep nginx
+[kogaye@web ~]$ sudo cat /etc/passwd | grep nginx
 nginx:x:996:993:Nginx web server:/var/lib/nginx:/sbin/nologin
 ```
-l'utilisateurqui lance nginx est nginx
+l'utilisateur qui lance nginx est nginx
 
 
 test
@@ -346,14 +346,14 @@ curl: Failed writing body
 
 Déterminer le path du fichier de configuration de NGINX
 ```bash
-[unuser@web ~]$ ls -al /etc/nginx/nginx.conf
--rw-r--r--. 1 root root 2334 Nov  8 17:43 /etc/nginx/nginx.conf
+[kogaye@web ~]$ ls -al /etc/nginx/nginx.conf
+-rw-r--r--. 1 root root 2334 Dec  26 22:35 /etc/nginx/nginx.conf
 ```
 
 trouver dans le fichier conf
 
 ```bash
-[unuser@web ~]$ cat /etc/nginx/nginx.conf | grep 80 -A 14
+[kogaye@web ~]$ cat /etc/nginx/nginx.conf | grep 80 -A 14
         listen       80;
         listen       [::]:80;
         server_name  _;
@@ -373,25 +373,25 @@ trouver dans le fichier conf
 ```
 
 ```bash
-[unuser@web ~]$ cat /etc/nginx/nginx.conf | grep "include /usr/"
+[kogaye@web ~]$ cat /etc/nginx/nginx.conf | grep "include /usr/"
 include /usr/share/nginx/modules/*.conf;
 ```
 
 ```bash 
-[unuser@web ~]$ cat /etc/nginx/nginx.conf | grep "user n"
+[kogaye@web ~]$ cat /etc/nginx/nginx.conf | grep "user n"
 user nginx;
 ```
 
 
 ```bash
-[unuser@web conf.d]$ echo $RANDOM
+[kogaye@web conf.d]$ echo $RANDOM
 5361
-[unuser@web conf.d]$ sudo nano site1_tp1
-[unuser@web conf.d]$ sudo firwall-cmd --permanent --remove-port=80/tcp
+[kogaye@web conf.d]$ sudo nano site1_tp1
+[kogaye@web conf.d]$ sudo firwall-cmd --permanent --remove-port=80/tcp
 sudo: firwall-cmd: command not found
-[unuser@web conf.d]$ sudo firewall-cmd --permanent --remove-port=80/tcp
+[kogaye@web conf.d]$ sudo firewall-cmd --permanent --remove-port=80/tcp
 success
-[unuser@web conf.d]$ sudo firewall-cmd --permanent --add-port=5361/tcp
+[kogaye@web conf.d]$ sudo firewall-cmd --permanent --add-port=5361/tcp
 success
 ```
 
@@ -438,22 +438,22 @@ http {
 
 
 ```bash
-[unuser@web default.d]$ echo $RANDOM
-18178
+[kogaye@web default.d]$ echo $RANDOM
+181768
 ```
 
 
 ```bash
   GNU nano 5.6.1            /etc/nginx/default.d/tp1_conf.conf                       server {
   # le port choisi devra être obtenu avec un 'echo $RANDOM' là encore
-  listen 18178;
+  listen 18168;
 
   root /var/www/tp1_parc;
 }
 ```
 
 ```bash
-$ curl 10.1.1.1:18178
+$ curl 10.1.1.1:18168
 <h1> MEOW mon premier serveur web <h1>
 
 ```
@@ -465,12 +465,12 @@ $ curl 10.1.1.1:18178
 
 
 ```bash
-[unuser@monitoring ~]$ sudo ss -tlnp | grep netdata
+[kogaye@monitoring ~]$ sudo ss -tlnp | grep netdata
 LISTEN 0      4096       127.0.0.1:8125       0.0.0.0:*    users:(("netdata",pid=2966,fd=46))
 LISTEN 0      4096         0.0.0.0:19999      0.0.0.0:*    users:(("netdata",pid=2966,fd=6))
 LISTEN 0      4096           [::1]:8125          [::]:*    users:(("netdata",pid=2966,fd=45))
 LISTEN 0      4096            [::]:19999         [::]:*    users:(("netdata",pid=2966,fd=7))
-[unuser@monitoring ~]$ sudo firewall-cmd --permanent --add-port=19999/tcp
+[kogaye@monitoring ~]$ sudo firewall-cmd --permanent --add-port=19999/tcp
 success
 [unuser@monitoring ~]$ sudo firewall-cmd --reload
 success
@@ -480,7 +480,7 @@ Donc netdata écoute sur 19999
 
 
 ```bash
-maybelater@DESKTOP-LH8R8DE MINGW64 ~
+Kogaye@Kogaye MINGW64 ~
 $ curl http://10.1.1.2:19999 | head 7
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
