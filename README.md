@@ -7,7 +7,7 @@ S'assurer que le service sshd est démarré
 [kogaye@web ~]$ systemctl status sshd
 ● sshd.service - OpenSSH server daemon
      Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)
-     Active: active (running) since Fri 2024-12-21 21:40:38 CET; 7min ago
+     Active: active (running) since Sat 2024-12-21 21:40:38 CET; 7min ago
        Docs: man:sshd(8)
              man:sshd_config(5)
    Main PID: 717 (sshd)
